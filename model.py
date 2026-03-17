@@ -3,9 +3,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset
 
 
-# ──────────────────────────────────────────────
-# DATASET CLASS
-# ──────────────────────────────────────────────
+
 class FakeNewsDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, max_len=256):
         self.texts     = texts
@@ -31,9 +29,9 @@ class FakeNewsDataset(Dataset):
         }
 
 
-# ──────────────────────────────────────────────
+
 # LSTM MODEL
-# ──────────────────────────────────────────────
+
 class LSTMClassifier(nn.Module):
     def __init__(self,
                  vocab_size=30522,
@@ -67,9 +65,9 @@ class LSTMClassifier(nn.Module):
         return self.fc(combined)
 
 
-# ──────────────────────────────────────────────
+
 # TEST THIS FILE WORKS
-# ──────────────────────────────────────────────
+
 if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model  = LSTMClassifier().to(device)
