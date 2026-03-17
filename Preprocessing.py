@@ -10,9 +10,9 @@ nltk.download('stopwords', quiet=True)
 STOPWORDS = set(stopwords.words('english'))
 
 
-# ──────────────────────────────────────────────
+
 # CLEAN A SINGLE ARTICLE
-# ──────────────────────────────────────────────
+
 def clean_text(text):
     text = str(text).lower()
     text = re.sub(r'https?://\S+|www\.\S+', '', text)  # remove URLs
@@ -24,9 +24,9 @@ def clean_text(text):
     return ' '.join(tokens)
 
 
-# ──────────────────────────────────────────────
+
 # LOAD DATASET
-# ──────────────────────────────────────────────
+
 def load_data(true_path='data/True.csv', fake_path='data/Fake.csv'):
     true_df = pd.read_csv(true_path)
     fake_df = pd.read_csv(fake_path)
@@ -50,9 +50,9 @@ def load_data(true_path='data/True.csv', fake_path='data/Fake.csv'):
     return df
 
 
-# ──────────────────────────────────────────────
+
 # SPLIT INTO TRAIN / VAL / TEST
-# ──────────────────────────────────────────────
+
 def split_data(df):
     texts  = df['content'].tolist()
     labels = df['label'].tolist()
@@ -74,16 +74,15 @@ def split_data(df):
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 
-# ──────────────────────────────────────────────
+
 # GET TOKENIZER
-# ──────────────────────────────────────────────
+
 def get_tokenizer():
     return BertTokenizer.from_pretrained('bert-base-uncased')
 
 
-# ──────────────────────────────────────────────
 # TEST THIS FILE WORKS
-# ──────────────────────────────────────────────
+
 if __name__ == '__main__':
     df = load_data()
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(df)
