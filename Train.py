@@ -24,14 +24,15 @@ from model import FakeNewsDataset, LSTMClassifier
 
 
 CONFIG = {
-    'batch_size' : 16,
-    'max_len'    : 256,
-    'epochs'     : 10,
+    'batch_size' : 32,     # was 64
+    'max_len'    : 256,    # was 128
+    'epochs'     : 10,     # was 5
     'lr'         : 1e-3,
-    'embed_dim'  : 128,
-    'hidden_dim' : 256,
-    'num_layers' : 2,
+    'embed_dim'  : 128,    # was 64
+    'hidden_dim' : 256,    # was 128
+    'num_layers' : 2,      # was 1
     'dropout'    : 0.3,
+    'sample_frac': 1.0,    # was 0.2  ← most important one!
     'save_path'  : 'checkpoints/lstm_best.pt',
 }
 
