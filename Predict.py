@@ -1,22 +1,30 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
+import re
 import torch
-import torch.nn as nn
-
-from Preprocessing import clean_text, get_tokenizer
-from model      import LSTMClassifier
+from model import LSTMClassifier
+from preprocessing import get_tokenizer
 
 
-# In[2]:
+# ──────────────────────────────────────────────
+# LIGHTER CLEANING FOR INFERENCE
+# We don't remove stopwords here because:
+# 1. Short inputs lose too many words
+# 2. Model already learned from cleaned training data
+# ──────────────────────────────────────────────
+def clean_text_predict(text):
+    text = str(text).lower()
+    text = re.sub(r'https?://\S+|www\.\S+', '', text)  # remove URLs
+    text = re.sub(r'<.*?>', '', text)                   # remove HTML tags
+    text = re.sub(r'[^a-z\s]', '', text)                # keep only letters
+    text = re.sub(r'\s+', ' ', text).strip()            # remove extra spaces
+    return text  # NO stopword removal!
 
 
+# ──────────────────────────────────────────────
+# LOAD MODEL
+# ──────────────────────────────────────────────
 def load_model(checkpoint_path='checkpoints/lstm_best.pt'):
-    device     = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    tokenizer  = get_tokenizer()
+    device    = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    tokenizer = get_tokenizer()
 
     checkpoint = torch.load(checkpoint_path, map_location=device)
     config     = checkpoint['config']
@@ -30,26 +38,19 @@ def load_model(checkpoint_path='checkpoints/lstm_best.pt'):
     ).to(device)
 
     model.load_state_dict(checkpoint['model_state_dict'])
-    model.eval()    # ALWAYS set to eval mode before inference!
-
+    model.eval()
     print(f"✅ Model loaded from {checkpoint_path}")
     return model, tokenizer, device
 
 
-# In[3]:
-
-
+# ──────────────────────────────────────────────
+# PREDICT A SINGLE ARTICLE
+# ──────────────────────────────────────────────
 def predict(text, model, tokenizer, device, max_len=256):
-    """
-    Takes raw article text, returns prediction + confidence.
-
-    Returns:
-        label      : 'FAKE' or 'REAL'
-        confidence : float between 0 and 1
-        probs      : dict with both class probabilities
-    """
-    # Step 1: Clean text (same as training preprocessing)
-    cleaned = clean_text(text)
+    # Step 1: Light cleaning (no stopword removal)
+    cleaned = clean_text_predict(text)
+    print(f"DEBUG cleaned text: '{cleaned}'")
+    print(f"DEBUG cleaned length: {len(cleaned.split())} words")
 
     # Step 2: Tokenize
     encoding = tokenizer(
@@ -61,41 +62,7 @@ def predict(text, model, tokenizer, device, max_len=256):
     )
     input_ids = encoding['input_ids'].to(device)
 
-    # Step 3: Forward pass — no gradients needed
-    with torch.no_grad():
-        logits = model(input_ids)                       # [1, 2]
-        probs  = torch.softmax(logits, dim=1)[0]        # [2]
-        pred   = logits.argmax(dim=1).item()            # 0 or 1
-
-    label      = 'FAKE' if pred == 1 else 'REAL'
-    confidence = probs[pred].item()
-
-    return {
-        'label'      : label,
-        'confidence' : confidence,
-        'prob_real'  : probs[0].item(),
-        'prob_fake'  : probs[1].item(),
-    }
-
-
-
-# In[4]:
-
-
-def predict(text, model, tokenizer, device, max_len=128):
-    cleaned = clean_text(text)
-    print(f"DEBUG cleaned text: '{cleaned}'")           # ← add here
-    print(f"DEBUG cleaned length: {len(cleaned.split())} words")  # ← add here
-
-    encoding = tokenizer(        # ← rest of your existing code continues
-        cleaned,
-        max_length=max_len,
-        padding='max_length',
-        truncation=True,
-        return_tensors='pt'
-    )
-    input_ids = encoding['input_ids'].to(device)
-
+    # Step 3: Forward pass
     with torch.no_grad():
         logits = model(input_ids)
         probs  = torch.softmax(logits, dim=1)[0]
@@ -109,18 +76,19 @@ def predict(text, model, tokenizer, device, max_len=128):
     }
 
 
-# In[ ]:
-
-
+# ──────────────────────────────────────────────
+# MAIN — user input loop
+# ──────────────────────────────────────────────
 if __name__ == '__main__':
     print("Loading model...")
     model, tokenizer, device = load_model()
 
     print("\n" + "="*55)
     print("  FAKE NEWS DETECTOR")
-    print("  Type an article or headline and press Enter")
+    print("  Paste a full article or long headline")
     print("  Type 'quit' to exit")
     print("="*55)
+    print("💡 Tip: longer articles give better predictions!\n")
 
     while True:
         print()
@@ -130,8 +98,8 @@ if __name__ == '__main__':
             print("Goodbye!")
             break
 
-        if len(text) < 10:
-            print("⚠️  Too short! Please enter a proper article or headline.")
+        if len(text.split()) < 5:
+            print("⚠️  Too short! Please enter at least a full sentence.")
             continue
 
         result = predict(text, model, tokenizer, device)
@@ -141,29 +109,9 @@ if __name__ == '__main__':
             print(f"  🚨 FAKE NEWS  —  {result['confidence']:.2%} confident")
         else:
             print(f"  ✅ REAL NEWS  —  {result['confidence']:.2%} confident")
-
         print(f"  Prob Real : {result['prob_real']:.2%}")
         print(f"  Prob Fake : {result['prob_fake']:.2%}")
         print("-"*55)
-
-
-# In[ ]:
-
-
-import torch
-checkpoint = torch.load('checkpoints/lstm_best.pt')
-print("Saved at epoch:", checkpoint['epoch'])
-print("Val loss:",       checkpoint['val_loss'])
-print("Val accuracy:",   checkpoint['val_acc'])
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
 
 
 
