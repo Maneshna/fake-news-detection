@@ -209,8 +209,8 @@ Then type any news article or headline and press Enter!
 ## 👤 Author
 
 **Your Name**
-- GitHub: [@your_username](https://github.com/Maneshna)
-- LinkedIn: [your_linkedin](https://linkedin.com/in/)
+- GitHub: [@Maneshna](https://github.com/Maneshna)
+- LinkedIn: [Maneshna](https://linkedin.com/in/)
 
 ---
 
