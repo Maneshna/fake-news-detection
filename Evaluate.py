@@ -123,7 +123,10 @@ if __name__ == '__main__':
     print(f"Device: {device}")
 
     # ── 1. Load test data ─────────────────────
-    df = load_data('True.csv', 'Fake.csv')
+    df = load_data(
+    '/content/drive/MyDrive/Colab Notebooks/True.csv',
+    '/content/drive/MyDrive/Colab Notebooks/Fake.csv'
+)
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(df)
     tokenizer = get_tokenizer()
 
