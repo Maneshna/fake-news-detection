@@ -1,10 +1,12 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
-
 from transformers import BertModel
 
 
+# ──────────────────────────────────────────────
+# DATASET (same file, since you insist)
+# ──────────────────────────────────────────────
 class FakeNewsDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, max_len=256):
         self.texts = texts
@@ -31,10 +33,9 @@ class FakeNewsDataset(Dataset):
         }
 
 
-
-
-
-
+# ──────────────────────────────────────────────
+# BERT MODEL (THIS replaces your LSTM)
+# ──────────────────────────────────────────────
 class BertClassifier(nn.Module):
     def __init__(self, dropout=0.3):
         super(BertClassifier, self).__init__()
@@ -49,7 +50,23 @@ class BertClassifier(nn.Module):
             attention_mask=attention_mask
         )
 
-        pooled = outputs.pooler_output
-        out = self.dropout(pooled)
+        pooled_output = outputs.pooler_output
+        out = self.dropout(pooled_output)
         return self.fc(out)
 
+
+# ──────────────────────────────────────────────
+# TEST
+# ──────────────────────────────────────────────
+if __name__ == '__main__':
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    model = BertClassifier().to(device)
+
+    dummy_ids = torch.randint(0, 30522, (4, 256)).to(device)
+    dummy_mask = torch.ones((4, 256)).to(device)
+
+    out = model(dummy_ids, dummy_mask)
+
+    print("Output shape:", out.shape)  # [4, 2]
+    print("✅ model.py working correctly!")
