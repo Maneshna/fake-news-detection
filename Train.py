@@ -102,7 +102,10 @@ if __name__ == '__main__':
     print(f"Device: {device}\n")
 
     #  1. Load data 
-    df = load_data('True.csv', 'Fake.csv')
+    df = load_data(
+    '/content/drive/MyDrive/Colab Notebooks/True.csv',
+    '/content/drive/MyDrive/Colab Notebooks/Fake.csv'
+)
 
     df = df.sample(frac=0.2, random_state=42).reset_index(drop=True)
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(df)
