@@ -134,7 +134,8 @@ if __name__ == '__main__':
 
     # 4. Optimizer, loss, scheduler 
     optimizer = optim.Adam(model.parameters(), lr=CONFIG['lr'])
-    criterion = nn.CrossEntropyLoss()
+    class_weights = torch.tensor([1.2, 1.0]).to(device)
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
     scheduler = ReduceLROnPlateau(optimizer, mode='min',
                                   patience=2, factor=0.5)
 
