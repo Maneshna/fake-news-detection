@@ -1,7 +1,7 @@
 import re
 import torch
 from model import LSTMClassifier
-from preprocessing import get_tokenizer
+from Preprocessing import get_tokenizer
 
 
 # ──────────────────────────────────────────────
