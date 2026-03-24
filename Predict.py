@@ -65,7 +65,7 @@ def predict(text, model, tokenizer, device, max_len=256):
     # Step 3: Forward pass
     with torch.no_grad():
         logits = model(input_ids)
-        probs  = torch.softmax(logits, dim=1)[0]
+        probs = torch.softmax(logits / 2.0, dim=1)[0]
         pred   = logits.argmax(dim=1).item()
 
     return {
