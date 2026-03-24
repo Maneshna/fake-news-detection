@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fake News Detector Dashboard - Detect News</title>
+  <link rel="stylesheet" href="style.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <div class="logo">
+        <i class="fa-solid fa-earth-americas"></i>
+        <span>Fake News Detector</span>
+      </div>
+
+      <nav class="menu">
+        <a href="index.html" class="menu-item">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </a>
+        <a href="detect.html" class="menu-item active">
+          <i class="fa-solid fa-envelope"></i>
+          <span>Detect News</span>
+        </a>
+        <a href="about.html" class="menu-item">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>About Model</span>
+        </a>
+        <a href="contact.html" class="menu-item">
+          <i class="fa-solid fa-phone"></i>
+          <span>Contact</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <i class="fa-solid fa-table-cells-large"></i>
+          <span>Detect News</span>
+        </div>
+
+        <div class="topbar-right">
+          <i class="fa-solid fa-comment"></i>
+          <i class="fa-solid fa-envelope-open-text"></i>
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </header>
+
+      <section class="content-area">
+        <h1>Fake News Detection</h1>
+
+        <div class="detector-card">
+          <textarea
+            id="newsInput"
+            placeholder="Enter news article content here..."
+          ></textarea>
+
+          <button id="checkBtn">Check News</button>
+
+          <div class="result-box" id="resultBox">Result: FAKE NEWS</div>
+
+          <div class="stats-row">
+            <div class="stat-item">
+              <span class="stat-label">Confidence:</span>
+              <span id="confidenceValue">89%</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Accuracy:</span>
+              <span>92%</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Category:</span>
+              <span id="categoryValue">Politics</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fake News Detector Dashboard - Home</title>
+  <link rel="stylesheet" href="style.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <div class="logo">
+        <i class="fa-solid fa-earth-americas"></i>
+        <span>Fake News Detector</span>
+      </div>
+
+      <nav class="menu">
+        <a href="index.html" class="menu-item active">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </a>
+        <a href="detect.html" class="menu-item">
+          <i class="fa-solid fa-envelope"></i>
+          <span>Detect News</span>
+        </a>
+        <a href="about.html" class="menu-item">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>About Model</span>
+        </a>
+        <a href="contact.html" class="menu-item">
+          <i class="fa-solid fa-phone"></i>
+          <span>Contact</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <i class="fa-solid fa-table-cells-large"></i>
+          <span>Home</span>
+        </div>
+
+        <div class="topbar-right">
+          <i class="fa-solid fa-comment"></i>
+          <i class="fa-solid fa-envelope-open-text"></i>
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </header>
+
+      <section class="content-area">
+        <h1>Welcome</h1>
+
+        <div class="detector-card">
+          <h2 class="page-subtitle">Fake News Detection Project</h2>
+          <p class="page-text">
+            This website is designed to identify whether a news article is real or fake
+            using a machine learning based model.
+          </p>
+
+          <div class="home-grid">
+            <div class="info-box">
+              <h3>Objective</h3>
+              <p>
+                To detect misleading or false news content using text analysis and prediction.
+              </p>
+            </div>
+
+            <div class="info-box">
+              <h3>Technology Used</h3>
+              <p>
+                HTML, CSS, JavaScript, Flask, Python, Pytorch, Scikit-learn, nltk, transformers.
+              </p>
+            </div>
+
+            <div class="info-box">
+              <h3>Model Accuracy</h3>
+              <p>
+                The model gives an approximate prediction accuracy of 92%.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

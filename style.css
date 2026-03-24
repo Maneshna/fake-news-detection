@@ -1,0 +1,267 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #f2f4f8;
+  min-height: 100vh;
+}
+
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background: linear-gradient(180deg, #233d72, #314f87);
+  color: white;
+  padding-top: 18px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 22px 18px;
+  font-size: 18px;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.logo i {
+  font-size: 20px;
+}
+
+.menu {
+  padding: 18px 12px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+  text-decoration: none;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.menu-item i {
+  width: 18px;
+}
+
+/* Main content */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 64px;
+  background: linear-gradient(90deg, #2d5fa8, #2d78de);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 15px;
+}
+
+.topbar-right i {
+  cursor: pointer;
+}
+
+.content-area {
+  padding: 30px;
+}
+
+.content-area h1 {
+  color: #1f3763;
+  font-size: 36px;
+  margin-bottom: 24px;
+  font-weight: 700;
+}
+
+.detector-card {
+  background: white;
+  border: 1px solid #dce3ec;
+  border-radius: 6px;
+  padding: 28px;
+  max-width: 900px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+}
+
+.page-subtitle {
+  color: #243b68;
+  margin-bottom: 16px;
+  font-size: 24px;
+}
+
+.page-text {
+  color: #4a5874;
+  font-size: 17px;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.info-box {
+  background: #f7f9fc;
+  border: 1px solid #dce3ec;
+  border-radius: 6px;
+  padding: 18px;
+}
+
+.info-box h3 {
+  color: #1f3763;
+  margin-bottom: 10px;
+  font-size: 19px;
+}
+
+.info-box p {
+  color: #52607b;
+  line-height: 1.5;
+}
+
+.contact-box p {
+  color: #52607b;
+  font-size: 17px;
+  margin-bottom: 14px;
+}
+
+textarea {
+  width: 100%;
+  height: 150px;
+  border: 1px solid #d4dce7;
+  border-radius: 4px;
+  padding: 16px;
+  font-size: 16px;
+  resize: none;
+  outline: none;
+  color: #444;
+  margin-bottom: 22px;
+}
+
+textarea:focus {
+  border-color: #4c86db;
+}
+
+button {
+  display: block;
+  margin: 0 auto 22px;
+  background: linear-gradient(180deg, #2d78de, #1c66cb);
+  color: white;
+  border: none;
+  padding: 13px 42px;
+  font-size: 17px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(28, 102, 203, 0.25);
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+.result-box {
+  background: linear-gradient(180deg, #f25f6c, #e84a58);
+  color: white;
+  text-align: center;
+  padding: 14px;
+  border-radius: 4px;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 22px;
+}
+
+.result-box.real {
+  background: linear-gradient(180deg, #4cc86d, #38b85a);
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 18px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  color: #42506a;
+  font-size: 16px;
+}
+
+.stat-label {
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 220px;
+  }
+
+  .content-area h1 {
+    font-size: 30px;
+  }
+
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .menu {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .content-area {
+    padding: 20px;
+  }
+
+  .stats-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

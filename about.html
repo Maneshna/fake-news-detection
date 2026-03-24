@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fake News Detector Dashboard - About Model</title>
+  <link rel="stylesheet" href="style.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+</head>
+<body>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <div class="logo">
+        <i class="fa-solid fa-earth-americas"></i>
+        <span>Fake News Detector</span>
+      </div>
+
+      <nav class="menu">
+        <a href="index.html" class="menu-item">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </a>
+        <a href="detect.html" class="menu-item">
+          <i class="fa-solid fa-envelope"></i>
+          <span>Detect News</span>
+        </a>
+        <a href="about.html" class="menu-item active">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>About Model</span>
+        </a>
+        <a href="contact.html" class="menu-item">
+          <i class="fa-solid fa-phone"></i>
+          <span>Contact</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <i class="fa-solid fa-table-cells-large"></i>
+          <span>About Model</span>
+        </div>
+
+        <div class="topbar-right">
+          <i class="fa-solid fa-comment"></i>
+          <i class="fa-solid fa-envelope-open-text"></i>
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </header>
+
+      <section class="content-area">
+        <h1>About Model</h1>
+
+        <div class="detector-card">
+          <h2 class="page-subtitle">How the Model Works</h2>
+          <p class="page-text">
+            The fake news detection model analyzes the textual content of a news article
+            and predicts whether it is real or fake.
+          </p>
+
+          <div class="home-grid">
+            <div class="info-box">
+              <h3>Algorithm</h3>
+              <p>
+                A machine learning classifier is trained on a dataset of real and fake news articles.
+              </p>
+            </div>
+
+            <div class="info-box">
+              <h3>Input</h3>
+              <p>
+                User enters the content of a news article into the text box for analysis.
+              </p>
+            </div>
+
+            <div class="info-box">
+              <h3>Output</h3>
+              <p>
+                The system predicts whether the article is real or fake along with confidence details.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
