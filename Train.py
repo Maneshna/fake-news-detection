@@ -26,7 +26,7 @@ from model import FakeNewsDataset, LSTMClassifier
 CONFIG = {
     'batch_size' : 32,     # was 64
     'max_len'    : 256,    # was 128
-    'epochs'     : 10,     # was 5
+    'epochs'     : 5,     # was 10
     'lr'         : 1e-3,
     'embed_dim'  : 128,    # was 64
     'hidden_dim' : 256,    # was 128
