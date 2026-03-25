@@ -10,7 +10,7 @@ from sklearn.metrics import (
 )
 from torch.utils.data import DataLoader
 
-from preprocessing import load_data, split_data, get_tokenizer
+from Preprocessing import load_data, split_data, get_tokenizer
 from model import FakeNewsDataset, DistilBertClassifier
 
 
