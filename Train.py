@@ -1,104 +1,121 @@
-import pandas as pd
-import re
-from sklearn.model_selection import train_test_split
-from transformers import DistilBertTokenizer
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+from transformers import AdamW
+
+from preprocessing import load_data, split_data, get_tokenizer
+from model import FakeNewsDataset, DistilBertClassifier
 
 
-# CLEAN A SINGLE ARTICLE (KEEP IT LIGHT)
-
-def clean_text(text):
-    text = str(text)
-
-    # Remove Reuters bias
-    text = re.sub(r'\(.*?Reuters.*?\)', '', text)
-
-    # Remove URLs
-    text = re.sub(r'https?://\S+|www\.\S+', '', text)
-
-    # Remove HTML
-    text = re.sub(r'<.*?>', '', text)
-
-    # Normalize spaces
-    text = re.sub(r'\s+', ' ', text).strip()
-
-    return text
+# ──────────────────────────────────────────────
+# CONFIG (CPU FRIENDLY)
+# ──────────────────────────────────────────────
+CONFIG = {
+    'batch_size': 4,
+    'max_len': 64,
+    'epochs': 1,
+    'lr': 2e-5,
+}
 
 
-# LOAD DATASET
+# ──────────────────────────────────────────────
+# TRAIN ONE EPOCH
+# ──────────────────────────────────────────────
+def train_epoch(model, loader, optimizer, criterion, device):
+    model.train()
+    total_loss, total_correct, total_samples = 0, 0, 0
 
-def load_data(true_path='data/True.csv', fake_path='data/Fake.csv', sample_frac=0.05):
-    true_df = pd.read_csv('True.csv')
-    fake_df = pd.read_csv('Fake.csv')
+    for batch in loader:
+        input_ids = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
+        labels = batch['label'].to(device)
 
-    true_df['label'] = 0  # Real
-    fake_df['label'] = 1  # Fake
+        optimizer.zero_grad()
 
-    # Combine title + text
-    true_df['content'] = true_df['title'] + ' ' + true_df['text']
-    fake_df['content'] = fake_df['title'] + ' ' + fake_df['text']
+        logits = model(input_ids, attention_mask)
+        loss = criterion(logits, labels)
 
-    df = pd.concat([
-        true_df[['content', 'label']],
-        fake_df[['content', 'label']]
-    ], ignore_index=True)
+        loss.backward()
+        optimizer.step()
 
-    # REMOVE EMPTY ROWS
-    df = df[df['content'].notnull()]
-    df = df[df['content'].str.strip() != ""]
+        preds = logits.argmax(dim=1)
+        total_correct += (preds == labels).sum().item()
+        total_samples += labels.size(0)
+        total_loss += loss.item()
 
-    # 🔥 SMALL DATA FOR CPU (IMPORTANT)
-    df = df.sample(frac=sample_frac, random_state=42).reset_index(drop=True)
-
-    print(f"Total samples : {len(df)}")
-    print(f"Real articles : {(df['label'] == 0).sum()}")
-    print(f"Fake articles : {(df['label'] == 1).sum()}")
-
-    # Clean text
-    df['content'] = df['content'].apply(clean_text)
-
-    return df
+    return total_loss / len(loader), total_correct / total_samples
 
 
-# SPLIT DATA
+# ──────────────────────────────────────────────
+# VALIDATION
+# ──────────────────────────────────────────────
+def val_epoch(model, loader, criterion, device):
+    model.eval()
+    total_loss, total_correct, total_samples = 0, 0, 0
 
-def split_data(df):
-    texts  = df['content'].tolist()
-    labels = df['label'].tolist()
+    with torch.no_grad():
+        for batch in loader:
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+            labels = batch['label'].to(device)
 
-    X_train, X_temp, y_train, y_temp = train_test_split(
-        texts, labels,
-        test_size=0.30,
-        random_state=42,
-        stratify=labels
-    )
+            logits = model(input_ids, attention_mask)
+            loss = criterion(logits, labels)
 
-    X_val, X_test, y_val, y_test = train_test_split(
-        X_temp, y_temp,
-        test_size=0.50,
-        random_state=42,
-        stratify=y_temp
-    )
+            preds = logits.argmax(dim=1)
+            total_correct += (preds == labels).sum().item()
+            total_samples += labels.size(0)
+            total_loss += loss.item()
 
-    print(f"Train: {len(X_train)} | Val: {len(X_val)} | Test: {len(X_test)}")
-    return X_train, X_val, X_test, y_train, y_val, y_test
-
-
-# TOKENIZER (DISTILBERT)
-
-def get_tokenizer():
-    return DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+    return total_loss / len(loader), total_correct / total_samples
 
 
-# TEST
-
+# ──────────────────────────────────────────────
+# MAIN
+# ──────────────────────────────────────────────
 if __name__ == '__main__':
-    df = load_data(sample_frac=0.05)  # small for testing
+    device = torch.device("cpu")  # FORCE CPU
+    print(f"Device: {device}\n")
+
+    # 1. Load data (IMPORTANT FIX HERE)
+    df = load_data('True.csv', 'Fake.csv', sample_frac=0.05)
+
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(df)
     tokenizer = get_tokenizer()
 
-    print(f"\nSample cleaned text:\n{X_train[0][:200]}")
-    print("\n✅ preprocessing.py ready for DistilBERT + CPU!")
+    # 2. Dataset + Loader
+    train_dataset = FakeNewsDataset(X_train, y_train, tokenizer, CONFIG['max_len'])
+    val_dataset = FakeNewsDataset(X_val, y_val, tokenizer, CONFIG['max_len'])
 
+    train_loader = DataLoader(train_dataset, batch_size=CONFIG['batch_size'], shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=CONFIG['batch_size'])
 
+    # 3. Model
+    model = DistilBertClassifier().to(device)
 
+    # 🔥 FREEZE BERT (CRUCIAL FOR CPU)
+    for param in model.bert.parameters():
+        param.requires_grad = False
 
+    # 4. Optimizer + Loss
+    optimizer = AdamW(model.parameters(), lr=CONFIG['lr'])
+    criterion = nn.CrossEntropyLoss()
+
+    # 5. Training loop
+    for epoch in range(CONFIG['epochs']):
+        print(f"\nEpoch {epoch+1}/{CONFIG['epochs']}")
+
+        train_loss, train_acc = train_epoch(
+            model, train_loader, optimizer, criterion, device
+        )
+
+        val_loss, val_acc = val_epoch(
+            model, val_loader, criterion, device
+        )
+
+        print(f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f}")
+        print(f"Val   Loss: {val_loss:.4f} | Val   Acc: {val_acc:.4f}")
+
+    # 6. Save model
+    torch.save(model.state_dict(), "model.pt")
+    print("\n✅ Model saved as model.pt")
