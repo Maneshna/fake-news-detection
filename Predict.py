@@ -1,7 +1,7 @@
 import torch
 import re
 from model import DistilBertClassifier
-from preprocessing import get_tokenizer, clean_text
+from Preprocessing import get_tokenizer, clean_text
 
 
 # LOAD MODEL
