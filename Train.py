@@ -26,7 +26,7 @@ def clean_text(text):
 
 # LOAD DATASET
 
-def load_data('True.csv', 'Fake.csv', sample_frac=0.05):
+def load_data(true_path='data/True.csv', fake_path='data/Fake.csv', sample_frac=0.05):
     true_df = pd.read_csv('True.csv')
     fake_df = pd.read_csv('Fake.csv')
 
