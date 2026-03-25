@@ -78,7 +78,8 @@ if __name__ == '__main__':
     print(f"Device: {device}\n")
 
     # 1. Load data (IMPORTANT FIX HERE)
-    df = load_data('True.csv', 'Fake.csv', sample_frac=0.05)
+    df = load_data('True.csv', 'Fake.csv')
+    df = df.sample(frac=0.05, random_state=42)
 
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(df)
     tokenizer = get_tokenizer()
