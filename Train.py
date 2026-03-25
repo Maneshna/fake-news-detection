@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 
-from preprocessing import load_data, split_data, get_tokenizer
+from Preprocessing import load_data, split_data, get_tokenizer
 from model import FakeNewsDataset, DistilBertClassifier
 
 
