@@ -1,180 +1,103 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-import os
+import pandas as pd
+import re
+from sklearn.model_selection import train_test_split
+from transformers import DistilBertTokenizer
 
 
-# In[2]:
+# CLEAN A SINGLE ARTICLE (KEEP IT LIGHT)
+
+def clean_text(text):
+    text = str(text)
+
+    # Remove Reuters bias
+    text = re.sub(r'\(.*?Reuters.*?\)', '', text)
+
+    # Remove URLs
+    text = re.sub(r'https?://\S+|www\.\S+', '', text)
+
+    # Remove HTML
+    text = re.sub(r'<.*?>', '', text)
+
+    # Normalize spaces
+    text = re.sub(r'\s+', ' ', text).strip()
+
+    return text
 
 
-from Preprocessing import load_data, split_data, get_tokenizer
-from model import FakeNewsDataset, LSTMClassifier
+# LOAD DATASET
+
+def load_data(true_path='data/True.csv', fake_path='data/Fake.csv', sample_frac=0.05):
+    true_df = pd.read_csv(true_path)
+    fake_df = pd.read_csv(fake_path)
+
+    true_df['label'] = 0  # Real
+    fake_df['label'] = 1  # Fake
+
+    # Combine title + text
+    true_df['content'] = true_df['title'] + ' ' + true_df['text']
+    fake_df['content'] = fake_df['title'] + ' ' + fake_df['text']
+
+    df = pd.concat([
+        true_df[['content', 'label']],
+        fake_df[['content', 'label']]
+    ], ignore_index=True)
+
+    # REMOVE EMPTY ROWS
+    df = df[df['content'].notnull()]
+    df = df[df['content'].str.strip() != ""]
+
+    # 🔥 SMALL DATA FOR CPU (IMPORTANT)
+    df = df.sample(frac=sample_frac, random_state=42).reset_index(drop=True)
+
+    print(f"Total samples : {len(df)}")
+    print(f"Real articles : {(df['label'] == 0).sum()}")
+    print(f"Fake articles : {(df['label'] == 1).sum()}")
+
+    # Clean text
+    df['content'] = df['content'].apply(clean_text)
+
+    return df
 
 
+# SPLIT DATA
 
-# In[3]:
+def split_data(df):
+    texts  = df['content'].tolist()
+    labels = df['label'].tolist()
 
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        texts, labels,
+        test_size=0.30,
+        random_state=42,
+        stratify=labels
+    )
 
-CONFIG = {
-    'batch_size' : 32,     # was 64
-    'max_len'    : 256,    # was 128
-    'epochs'     : 5,     # was 10
-    'lr'         : 1e-3,
-    'embed_dim'  : 128,    # was 64
-    'hidden_dim' : 256,    # was 128
-    'num_layers' : 2,      # was 1
-    'dropout'    : 0.3,
-    'sample_frac': 1.0,    # was 0.2  ← most important one!
-    'save_path'  : 'checkpoints/lstm_best.pt',
-}
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp, y_temp,
+        test_size=0.50,
+        random_state=42,
+        stratify=y_temp
+    )
 
-
-# In[4]:
-
-
-#traing of the code 
-def train_epoch(model, loader, optimizer, criterion, device):
-    model.train()
-    total_loss, total_correct, total_samples = 0, 0, 0
-
-    for batch_idx, batch in enumerate(loader):
-        input_ids = batch['input_ids'].to(device)
-        labels    = batch['label'].to(device)
-
-        optimizer.zero_grad()
-        logits = model(input_ids)
-        loss   = criterion(logits, labels)
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-        optimizer.step()
-
-        preds = logits.argmax(dim=1)
-        total_correct += (preds == labels).sum().item()
-        total_samples += labels.size(0)
-        total_loss    += loss.item()
-
-        if (batch_idx + 1) % 50 == 0:
-            print(f"  Batch {batch_idx+1}/{len(loader)} | "
-                  f"Loss: {loss.item():.4f} | "
-                  f"Acc: {total_correct/total_samples:.4f}")
-
-    return total_loss / len(loader), total_correct / total_samples
+    print(f"Train: {len(X_train)} | Val: {len(X_val)} | Test: {len(X_test)}")
+    return X_train, X_val, X_test, y_train, y_val, y_test
 
 
-# In[5]:
+# TOKENIZER (DISTILBERT)
+
+def get_tokenizer():
+    return DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 
 
-# VALIDATE ONE EPOCH
-
-def val_epoch(model, loader, criterion, device):
-    model.eval()
-    total_loss, total_correct, total_samples = 0, 0, 0
-
-    with torch.no_grad():
-        for batch in loader:
-            input_ids = batch['input_ids'].to(device)
-            labels    = batch['label'].to(device)
-
-            logits = model(input_ids)
-            loss   = criterion(logits, labels)
-
-            preds = logits.argmax(dim=1)
-            total_correct += (preds == labels).sum().item()
-            total_samples += labels.size(0)
-            total_loss    += loss.item()
-
-    return total_loss / len(loader), total_correct / total_samples
-
-
-# In[6]:
-
+# TEST
 
 if __name__ == '__main__':
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Device: {device}\n")
-
-    #  1. Load data 
-    df = load_data(
-    '/content/drive/MyDrive/Colab Notebooks/True.csv',
-    '/content/drive/MyDrive/Colab Notebooks/Fake.csv'
-)
-
-    df = df.sample(frac=0.2, random_state=42).reset_index(drop=True)
+    df = load_data(sample_frac=0.05)  # small for testing
     X_train, X_val, X_test, y_train, y_val, y_test = split_data(df)
     tokenizer = get_tokenizer()
 
-    #  2. Datasets & loaders 
-    train_dataset = FakeNewsDataset(X_train, y_train, tokenizer, CONFIG['max_len'])
-    val_dataset   = FakeNewsDataset(X_val,   y_val,   tokenizer, CONFIG['max_len'])
-
-    train_loader  = DataLoader(train_dataset, batch_size=CONFIG['batch_size'],
-                               shuffle=True,  num_workers=0)
-    val_loader    = DataLoader(val_dataset,   batch_size=CONFIG['batch_size'],
-                               shuffle=False, num_workers=0)
-
-    # 3. Model 
-    model = LSTMClassifier(
-        vocab_size=tokenizer.vocab_size,
-        embed_dim=CONFIG['embed_dim'],
-        hidden_dim=CONFIG['hidden_dim'],
-        num_layers=CONFIG['num_layers'],
-        dropout=CONFIG['dropout']
-    ).to(device)
-
-    total_params = sum(p.numel() for p in model.parameters())
-    print(f"Model parameters: {total_params:,}\n")
-
-    # 4. Optimizer, loss, scheduler 
-    optimizer = optim.Adam(model.parameters(), lr=CONFIG['lr'])
-    class_weights = torch.tensor([1.2, 1.0]).to(device)
-    criterion = nn.CrossEntropyLoss(weight=class_weights)
-    scheduler = ReduceLROnPlateau(optimizer, mode='min',
-                                  patience=2, factor=0.5)
-
-    # 5. Training loop 
-    os.makedirs('checkpoints', exist_ok=True)
-    best_val_loss = float('inf')
-
-    for epoch in range(CONFIG['epochs']):
-        print(f"\n{'='*50}")
-        print(f"Epoch {epoch+1}/{CONFIG['epochs']}")
-        print('='*50)
-
-        train_loss, train_acc = train_epoch(
-            model, train_loader, optimizer, criterion, device)
-
-        val_loss, val_acc = val_epoch(
-            model, val_loader, criterion, device)
-
-        scheduler.step(val_loss)
-
-        print(f"\n  train_loss: {train_loss:.4f} | train_acc: {train_acc:.4f}")
-        print(f"  val_loss:   {val_loss:.4f}   | val_acc:   {val_acc:.4f}")
-
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            torch.save({
-                'epoch'               : epoch + 1,
-                'model_state_dict'    : model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'val_loss'            : val_loss,
-                'val_acc'             : val_acc,
-                'config'              : CONFIG,
-            }, CONFIG['save_path'])
-            print(f" Best model saved! val_loss={val_loss:.4f}")
-
-    print(f"\nTraining complete. Best val_loss: {best_val_loss:.4f}")
-
-
-# In[ ]:
+    print(f"\nSample cleaned text:\n{X_train[0][:200]}")
+    print("\n✅ preprocessing.py ready for DistilBERT + CPU!")
 
 
 
