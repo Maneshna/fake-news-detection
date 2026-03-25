@@ -14,9 +14,8 @@ from preprocessing import load_data, split_data, get_tokenizer
 from model import FakeNewsDataset, DistilBertClassifier
 
 
-# ──────────────────────────────────────────────
 # EVALUATE
-# ──────────────────────────────────────────────
+
 def evaluate(model, loader, criterion, device):
     model.eval()
     total_loss = 0
@@ -43,9 +42,9 @@ def evaluate(model, loader, criterion, device):
     return avg_loss, all_preds, all_labels, all_probs
 
 
-# ──────────────────────────────────────────────
+
 # METRICS
-# ──────────────────────────────────────────────
+
 def print_metrics(all_labels, all_preds, all_probs):
     print("\n" + "="*55)
     print("CLASSIFICATION REPORT")
@@ -65,9 +64,9 @@ def print_metrics(all_labels, all_preds, all_probs):
     print(f"Accuracy      : {accuracy:.4f}  ({correct}/{len(all_labels)})")
 
 
-# ──────────────────────────────────────────────
+
 # CONFUSION MATRIX
-# ──────────────────────────────────────────────
+
 def plot_confusion_matrix(all_labels, all_preds):
     cm = confusion_matrix(all_labels, all_preds)
 
@@ -84,9 +83,9 @@ def plot_confusion_matrix(all_labels, all_preds):
     print("Saved: confusion_matrix.png")
 
 
-# ──────────────────────────────────────────────
+
 # ROC CURVE
-# ──────────────────────────────────────────────
+
 def plot_roc_curve(all_labels, all_probs):
     fpr, tpr, _ = roc_curve(all_labels, all_probs)
     auc = roc_auc_score(all_labels, all_probs)
@@ -107,9 +106,8 @@ def plot_roc_curve(all_labels, all_probs):
     print("Saved: roc_curve.png")
 
 
-# ──────────────────────────────────────────────
 # MAIN
-# ──────────────────────────────────────────────
+
 if __name__ == '__main__':
     device = torch.device("cpu")  # FORCE CPU
     print(f"Device: {device}")
