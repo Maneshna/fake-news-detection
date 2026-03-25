@@ -1,14 +1,13 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
-from transformers import BertModel
+from transformers import DistilBertModel
 
 
-# ──────────────────────────────────────────────
-# DATASET (same file, since you insist)
-# ──────────────────────────────────────────────
+# DATASET
+
 class FakeNewsDataset(Dataset):
-    def __init__(self, texts, labels, tokenizer, max_len=256):
+    def __init__(self, texts, labels, tokenizer, max_len=128):  # reduced
         self.texts = texts
         self.labels = labels
         self.tokenizer = tokenizer
@@ -32,17 +31,15 @@ class FakeNewsDataset(Dataset):
             'label': torch.tensor(self.labels[idx], dtype=torch.long)
         }
 
+# DISTILBERT MODEL
 
-# ──────────────────────────────────────────────
-# BERT MODEL (THIS replaces your LSTM)
-# ──────────────────────────────────────────────
-class BertClassifier(nn.Module):
+class DistilBertClassifier(nn.Module):
     def __init__(self, dropout=0.3):
-        super(BertClassifier, self).__init__()
+        super(DistilBertClassifier, self).__init__()
 
-        self.bert = BertModel.from_pretrained('bert-base-uncased')
+        self.bert = DistilBertModel.from_pretrained("distilbert-base-uncased")
         self.dropout = nn.Dropout(dropout)
-        self.fc = nn.Linear(self.bert.config.hidden_size, 2)
+        self.fc = nn.Linear(768, 2)
 
     def forward(self, input_ids, attention_mask):
         outputs = self.bert(
@@ -50,23 +47,25 @@ class BertClassifier(nn.Module):
             attention_mask=attention_mask
         )
 
-        pooled_output = outputs.pooler_output
-        out = self.dropout(pooled_output)
+        # CLS token representation
+        hidden_state = outputs.last_hidden_state[:, 0]
+
+        out = self.dropout(hidden_state)
         return self.fc(out)
 
 
-# ──────────────────────────────────────────────
+
 # TEST
-# ──────────────────────────────────────────────
+
 if __name__ == '__main__':
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu')  # FORCE CPU
 
-    model = BertClassifier().to(device)
+    model = DistilBertClassifier().to(device)
 
-    dummy_ids = torch.randint(0, 30522, (4, 256)).to(device)
-    dummy_mask = torch.ones((4, 256)).to(device)
+    dummy_ids = torch.randint(0, 30522, (2, 128)).to(device)
+    dummy_mask = torch.ones((2, 128)).to(device)
 
     out = model(dummy_ids, dummy_mask)
 
-    print("Output shape:", out.shape)  # [4, 2]
-    print("✅ model.py working correctly!")
+    print("Output shape:", out.shape)  # [2, 2]
+    print("✅ model.py ready for CPU + DistilBERT!")
