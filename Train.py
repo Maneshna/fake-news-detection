@@ -13,7 +13,7 @@ from model import FakeNewsDataset, DistilBertClassifier
 CONFIG = {
     'batch_size': 4,
     'max_len': 64,
-    'epochs': 1,
+    'epochs': 3,
     'lr': 2e-5,
 }
 
