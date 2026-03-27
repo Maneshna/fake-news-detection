@@ -7,9 +7,8 @@ from Preprocessing import load_data, split_data, get_tokenizer
 from model import FakeNewsDataset, DistilBertClassifier
 
 
-# ──────────────────────────────────────────────
 # CONFIG (CPU FRIENDLY)
-# ──────────────────────────────────────────────
+
 CONFIG = {
     'batch_size': 4,
     'max_len': 64,
@@ -46,9 +45,9 @@ def train_epoch(model, loader, optimizer, criterion, device):
     return total_loss / len(loader), total_correct / total_samples
 
 
-# ──────────────────────────────────────────────
+
 # VALIDATION
-# ──────────────────────────────────────────────
+
 def val_epoch(model, loader, criterion, device):
     model.eval()
     total_loss, total_correct, total_samples = 0, 0, 0
@@ -70,9 +69,9 @@ def val_epoch(model, loader, criterion, device):
     return total_loss / len(loader), total_correct / total_samples
 
 
-# ──────────────────────────────────────────────
+
 # MAIN
-# ──────────────────────────────────────────────
+
 if __name__ == '__main__':
     device = torch.device("cpu")  # FORCE CPU
     print(f"Device: {device}\n")
